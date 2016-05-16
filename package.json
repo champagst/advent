@@ -1,0 +1,6 @@
+{
+  "author": "Steve Champagne <champagst@gmail.com>",
+  "dependencies": {
+    "md5": "^2.1.0"
+  }
+}
