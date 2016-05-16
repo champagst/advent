@@ -176,4 +176,67 @@
          salt++;
       }
    }
+
+   /***
+    * Day 5 *
+          ***/
+
+   function* advent_5_data() {
+      var lines = fs.readFileSync('data/5', 'utf8').split('\n');
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i];
+         if (line.length) {
+            yield line;
+         }
+      }
+   }
+
+   function count_vowels(s) {
+      return s.replace(/[^aeiou]/g, '').length;
+   }
+
+   function has_run(s) {
+      return /(.)\1/.test(s);
+   }
+
+   function has_bad_pair(s) {
+      var bad_pairs = ['ab', 'cd', 'pq', 'xy'];
+      return s.search(new RegExp(bad_pairs.join('|'))) > -1;
+   }
+
+   function advent_5_1() {
+      function is_nice(s) {
+         return !has_bad_pair(s) && count_vowels(s) >= 3 && has_run(s);
+      }
+
+      var total_nice = 0;
+      for (let string of advent_5_data()) {
+         if (is_nice(string)) {
+            total_nice++;
+         }
+      }
+      return total_nice;
+   }
+
+   function has_repeat_pair(s) {
+      return /(..).*\1/.test(s);
+   }
+
+   function has_repeat_letter(s) {
+      return /(.).\1/.test(s);
+   }
+
+   function advent_5_2() {
+      function is_nice(s) {
+         return has_repeat_pair(s) && has_repeat_letter(s);
+      }
+
+      var total_nice = 0;
+      for (let string of advent_5_data()) {
+         if (is_nice(string)) {
+            total_nice++;
+         }
+      }
+      return total_nice;
+   }
 })();
