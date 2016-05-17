@@ -239,4 +239,102 @@
       }
       return total_nice;
    }
+
+   /***
+    * Day 6 *
+          ***/
+
+   function line_to_command(s) {
+      var line = /(\w+ ?\w*) (\d+),(\d+) through (\d+),(\d+)/.exec(s);
+      return [line.splice(1,1)[0], line.splice(1,4)];
+   }
+
+   function* advent_6_data() {
+      var lines = fs.readFileSync('data/6', 'utf8').split('\n');
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i];
+         if (line.length) {
+            yield line_to_command(line);
+         }
+      }
+   }
+
+   function foreach_light(lights, callback) {
+      lights.forEach((row, y) => {
+         row.forEach((light, x) => {
+            callback(x, y);
+         });
+      });
+   }
+
+   function set_lights(instruction, box, lights) {
+      foreach_light(lights, (x, y) => {
+         if (box[0] <= x && x <= box[2] && box[1] <= y && y <= box[3]) {
+            if (instruction == 'turn on') {
+               lights[y][x] = 1;
+            } else if (instruction == 'turn off') {
+               lights[y][x] = 0;
+            } else if (instruction == 'toggle') {
+               lights[y][x] = (lights[y][x] == 1) ? 0 : 1;
+            }
+         }
+      });
+   }
+
+   function set_brightness(instruction, box, lights) {
+      foreach_light(lights, (x, y) => {
+         if (box[0] <= x && x <= box[2] && box[1] <= y && y <= box[3]) {
+            if (instruction == 'turn on') {
+               lights[y][x] += 1;
+            } else if (instruction == 'turn off') {
+               lights[y][x] -= 1;
+            } else if (instruction == 'toggle') {
+               lights[y][x] += 2;
+            }
+            if (lights[y][x] < 0) {
+               lights[y][x] = 0;
+            }
+         }
+      });
+   }
+
+   function advent_6_1() {
+      var lights = Array(1000).fill(0).map(() => Array(1000).fill(0));
+
+      for (let command of advent_6_data()) {
+         var instruction = command[0],
+             box = command[1];
+
+         set_lights(instruction, box, lights);
+      }
+
+      var total_lit = 0;
+
+      foreach_light(lights, (x, y) => {
+         if (lights[y][x]) {
+            total_lit++;
+         }
+      });
+
+      return total_lit;
+   }
+
+   function advent_6_2() {
+      var lights = Array(1000).fill(0).map(() => Array(1000).fill(0));
+
+      for (let command of advent_6_data()) {
+         var instruction = command[0],
+             box = command[1];
+
+         set_brightness(instruction, box, lights);
+      }
+
+      var total_brightness = 0;
+
+      foreach_light(lights, (x, y) => {
+         total_brightness += lights[y][x];
+      });
+      
+      return total_brightness;
+   }
 })();
