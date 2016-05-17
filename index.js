@@ -245,7 +245,7 @@
           ***/
 
    function line_to_command(s) {
-      var line = /(\w+ ?\w*) (\d+),(\d+) through (\d+),(\d+)/.exec(s);
+      var line = /(\w+(?: \w+)?) (\d+),(\d+) through (\d+),(\d+)/.exec(s);
       return [line.splice(1,1)[0], line.splice(1,4)];
    }
 
