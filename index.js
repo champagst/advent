@@ -337,4 +337,117 @@
       
       return total_brightness;
    }
+
+   /***
+    * Day 7 *
+          ***/
+
+   var operators = { 
+                     'AND':    (a, b) => { return a & b; },
+                     'OR':     (a, b) => { return a | b; },
+                     'LSHIFT': (a, b) => { return a << b; },
+                     'RSHIFT': (a, b) => { return a >> b; },
+                     'NOT':    (a)    => { return ~a; },
+                     '->':     (a)    => { return a; } 
+                   };
+
+   function binary_operator(s) {
+      var regex = /(\w+) (AND|OR|LSHIFT|RSHIFT) (\w+) -> (\w+)/.exec(s);
+
+      if (regex) {
+         var op    = regex.splice(2, 1)[0],
+             dest  = regex.splice(3, 1)[0],
+             input = regex.splice(1, 2);
+
+         return [op, dest, input];
+      }
+   }
+
+   function unary_operator(s) {
+      var regex = /(NOT) (\w+) -> (\w+)/.exec(s);
+
+      if (regex) {
+         var op    = regex.splice(1, 1)[0],
+             dest  = regex.splice(2, 1)[0],
+             input = regex.splice(1, 1);
+
+         return [op, dest, input];
+      }
+   }
+
+   function assignment_operator(s) {
+      var regex = /(\w+) -> (\w+)/.exec(s);
+
+      if (regex) {
+         var dest = regex.splice(2, 1)[0],
+             input = regex.splice(1, 1);
+
+         return ['->', dest, input];
+      }
+   }
+
+   function line_to_command(s) {
+      var command;
+
+      command = binary_operator(s);
+      if (command) {
+         return command;
+      }
+
+      command = unary_operator(s);
+      if (command) {
+         return command;
+      }
+
+      command = assignment_operator(s);
+      if (command) {
+         return command;
+      }
+   }
+
+   var wires = {},
+       cache = {};
+
+   function lookup(wire) {
+      var value = parseInt(wire);
+
+      if (isNaN(value)) {
+         if (wire in cache) {
+            value = cache[wire];
+         } else if (wire in wires) {
+            value = cache[wire] = resolve(wires[wire]);
+         } else {
+            value = 0;
+         }
+      }
+
+      return value;
+   }
+
+   function resolve(command) {
+      var op     = command[0],
+          inputs = command[2].map(lookup);
+
+      return operators[op].apply(null, inputs);
+   }
+
+   function* advent_7_data() {
+      var lines = fs.readFileSync('data/7', 'utf8').split('\n');
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i];
+         if (line.length) {
+            yield line_to_command(line);
+         }
+      }
+   }
+
+   function advent_7_1() {
+      for (let command of advent_7_data()) {
+         var dest = command[1];
+
+         wires[dest] = command;
+      }
+
+      return resolve(wires['a']);
+   }
 })();
