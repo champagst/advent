@@ -450,4 +450,75 @@
 
       return resolve(wires['a']);
    }
+
+   /***
+    * Day 8 *
+          ***/
+
+   function* advent_8_data() {
+      var lines = fs.readFileSync('data/8', 'utf8').split('\n');
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i];
+         if (line.length) {
+            yield line;
+         }
+      }
+   }
+
+   function count_code_characters(s) {
+      return s.length;
+   }
+
+   function count_string_characters(s) {
+      var count = 0;
+      for (var i = 1; i < s.length - 1; i++) {
+         if (s[i] == '\\') {
+            var offset = 0;
+            if (s[i + 1] == '"' || s[i + 1] == '\\') {
+               offset = 1;
+            }
+            if (s[i + 1] == 'x')  {
+               offset = 3;
+            }
+            i += offset;
+         }
+         count++;
+      }
+      return count;
+   }
+
+   function advent_8_1() {
+      var code_characters = 0,
+          string_characters = 0;
+      for (let line of advent_8_data()) {
+         code_characters += count_code_characters(line);
+         string_characters += count_string_characters(line);
+      }
+      return code_characters - string_characters;
+   }
+
+   function encode(s) {
+      var new_str = [];
+      new_str.push('"');
+      [].forEach.call(s, (c) => {
+         if (c == '"' || c == '\\') {
+            new_str.push('\\');
+         }
+         new_str.push(c);
+      });
+      new_str.push('"');
+      return new_str.join('');
+   }
+
+   function advent_8_2() {
+      var code_characters = 0,
+          string_characters = 0,
+          encoded;
+      for (let line of advent_8_data()) {
+         encoded = encode(line);
+         code_characters += count_code_characters(encoded);
+         string_characters += count_string_characters(encoded);
+      }
+      return code_characters - string_characters;
+   }
 })();
