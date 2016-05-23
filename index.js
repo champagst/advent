@@ -498,16 +498,16 @@
    }
 
    function encode(s) {
-      var new_str = [];
-      new_str.push('"');
+      var new_str = '';
+      new_str += '"';
       [].forEach.call(s, (c) => {
          if (c == '"' || c == '\\') {
-            new_str.push('\\');
+            new_str += '\\';
          }
-         new_str.push(c);
+         new_str += c;
       });
-      new_str.push('"');
-      return new_str.join('');
+      new_str += '"';
+      return new_str;
    }
 
    function advent_8_2() {
