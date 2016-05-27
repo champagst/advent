@@ -521,4 +521,50 @@
       }
       return code_characters - string_characters;
    }
+
+   /***
+    * Day 10 *
+           ***/
+
+   var advent_10_data = '1113122113';
+
+   function look_and_say(s) {
+      var input = s.split(''),
+          output = '',
+          prev, current,
+          count = 0;
+
+      current = input.shift();
+      do {
+         count++;
+         prev = current;
+         current = input.shift();
+         if (prev != current) {
+            output += count + prev;
+            count = 0;
+         }
+      } while (current);
+
+      return output;
+   }
+
+   function advent_10_1(data) {
+      var result = data;
+
+      for (var i = 0; i < 40; i++) {
+         result = look_and_say(result);
+      }
+
+      return result.length;
+   }
+
+   function advent_10_2(data) {
+      var result = data;
+
+      for (var i = 0; i < 50; i++) {
+         result = look_and_say(result);
+      }
+
+      return result.length;
+   }
 })();
