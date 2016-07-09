@@ -567,4 +567,93 @@
 
       return result.length;
    }
+
+   /***
+    * Day 11 *
+           ***/
+
+   var advent_11_data = 'vzbxkghb';
+
+   var alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+   function step_password(password) {
+      var chars = [];
+
+      for (var i = 0; i < password.length; i++) {
+         chars.push(alphabet.indexOf(password[i]));
+      }
+
+      for (var i = chars.length - 1; i >= 0; i--) {
+         var tmp = chars[i];
+         if (tmp >= 0 && tmp < 25) {
+            chars[i]++;
+            break;
+         } else {
+            chars[i] = 0;
+         }
+      }
+
+      var newstr = '';
+      for (var i = 0; i < chars.length; i++) {
+         newstr += alphabet[chars[i]];
+      }
+
+      return newstr;
+   }
+
+   function has_bad_letter(s) {
+      return /[iol]/.test(s);
+   }
+
+   function has_increasing_straight(s) {
+      var chars = [];
+
+      for (var i = 0; i < s.length; i++) {
+         chars.push(alphabet.indexOf(s[i]));
+      }
+
+      var consecutive = 0;
+
+      for (var i = 0; i < chars.length; i++) {
+         if (i > 0 && chars[i] == chars[i - 1] + 1) {
+            consecutive++;
+         } else {
+            consecutive = 0;
+         }
+
+         if (consecutive >= 2) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   function has_pair(s) {
+      return /(.)\1/.test(s);
+   }
+
+   function count_pairs(s) {
+      var count = 0;
+      for (var i = 0; i < s.length;) {
+         var tmp = s.slice(i, i + 2);
+         if (has_pair(tmp)) {
+            count++;
+            i += 2;
+         } else {
+            i++;
+         }
+      }
+      return count;
+   }
+
+   function advent_11(data) {
+      var new_password = step_password(data);
+      while (!(has_increasing_straight(new_password) &&
+             !has_bad_letter(new_password) &&
+             count_pairs(new_password) >= 2)) {
+         new_password = step_password(new_password);
+      }
+      return new_password;
+   }
 })();
