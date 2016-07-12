@@ -612,16 +612,16 @@
          chars.push(alphabet.indexOf(s[i]));
       }
 
-      var consecutive = 0;
+      var consecutive = 1;
 
       for (var i = 0; i < chars.length; i++) {
          if (i > 0 && chars[i] == chars[i - 1] + 1) {
             consecutive++;
          } else {
-            consecutive = 0;
+            consecutive = 1;
          }
 
-         if (consecutive >= 2) {
+         if (consecutive >= 3) {
             return true;
          }
       }
@@ -655,5 +655,65 @@
          new_password = step_password(new_password);
       }
       return new_password;
+   }
+
+   /***
+    * Day 12 *
+           ***/
+
+   function advent_12_data() {
+      return fs.readFileSync('data/12', 'utf8');
+   }
+
+   function advent_12_1() {
+      var regex = /-?\d+/g,
+          data = advent_12_data();
+
+      var value,
+          total = 0;
+
+      while ((value = regex.exec(data)) != null) {
+         total += parseInt(value);
+      }
+
+      return total;
+   }
+
+   function sum(object) {
+      var acc = 0;
+
+      if (Array.isArray(object)) {
+         for (var i = 0; i < object.length; i++) {
+            var element = object[i];
+            if (typeof(element) === 'number') {
+               acc += element;
+            } else {
+               acc += sum(element);
+            }
+         }
+      } else if (typeof(object) === 'object') {
+         for (var property in object) {
+            if (object[property] === 'red') {
+               return acc;
+            }
+         }
+
+         for (var property in object) {
+            var element = object[property];
+            if (typeof(element) === 'number') {
+               acc += element;
+            } else {
+               acc += sum(element);
+            }
+         }
+      }
+
+      return acc;
+   }
+
+   function advent_12_2() {
+      var data = advent_12_data();
+
+      return sum(JSON.parse(data));
    }
 })();
