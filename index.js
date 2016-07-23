@@ -716,4 +716,125 @@
 
       return sum(JSON.parse(data));
    }
+
+   /***
+    * Day 13 *
+           ***/
+
+   var people = {};
+
+   function permutator(inputArr) {
+      var results = [];
+
+      function permute(arr, memo) {
+         var cur, memo = memo || [];
+
+         for (var i = 0; i < arr.length; i++) {
+            cur = arr.splice(i, 1);
+            if (arr.length === 0) {
+               results.push(memo.concat(cur));
+            }
+            permute(arr.slice(), memo.concat(cur));
+            arr.splice(i, 0, cur[0]);
+         }
+
+         return results;
+      }
+
+      return permute(inputArr);
+   }
+
+   function add_neighbor(person, neighbor, happiness) {
+      if (!(person in people)) {
+         people[person] = {};
+      }
+
+      var neighbors = people[person];
+
+      neighbors[neighbor] = happiness;
+   }
+
+   function get_happiness(person, neighbor) {
+      var happiness = 0;
+
+      if (person in people) {
+         var neighbors = people[person];
+         if (neighbor in neighbors) {
+            happiness = neighbors[neighbor];
+         }
+      }
+
+      return happiness;
+   }
+
+   function calculate_happiness(seating) {
+      var result = 0;
+
+      seating.forEach((person, i) => {
+         var left, right;
+
+         if (i === 0) {
+            left = seating[seating.length - 1];
+         } else {
+            left = seating[i - 1];
+         }
+
+         if (i === seating.length - 1) {
+            right = seating[0];
+         } else {
+            right = seating[i + 1];
+         }
+
+         result += get_happiness(person, left) + get_happiness(person, right);      
+      });
+
+      return result;
+   }
+
+   function advent_13_data() {
+      var lines = fs.readFileSync('data/13', 'utf8').split('\n');
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i],
+             regex = /(\w+) would (gain|lose) (\d+) happiness units by sitting next to (\w+)./.exec(line);
+
+         if (regex) {
+            var units = parseInt(regex[3]);
+
+            if (regex[2] === 'lose') {
+               units *= -1;
+            }
+
+            add_neighbor(regex[1], regex[4], units);
+         }
+      }
+   }
+
+   function advent_13_1() {
+      var happiness = -Infinity;
+
+      advent_13_data();
+
+      permutator(Object.keys(people)).forEach((seating) => {
+         happiness = Math.max(happiness, calculate_happiness(seating));
+      });
+
+      return happiness;
+   }
+
+   function advent_13_2() {
+      var happiness = -Infinity;
+
+      advent_13_data();
+
+      Object.keys(people).forEach((person) => {
+         add_neighbor('Me', person, 0);
+         add_neighbor(person, 'Me', 0);
+      });
+
+      permutator(Object.keys(people)).forEach((seating) => {
+         happiness = Math.max(happiness, calculate_happiness(seating));
+      });
+
+      return happiness;
+   }
 })();
