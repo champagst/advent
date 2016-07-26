@@ -522,6 +522,105 @@
    }
 
    /***
+    * Day 9 *
+          ***/
+
+   var places = {};
+
+   function permutator(inputArr) {
+      var results = [];
+
+      function permute(arr, memo) {
+         var cur, memo = memo || [];
+
+         for (var i = 0; i < arr.length; i++) {
+            cur = arr.splice(i, 1);
+            if (arr.length === 0) {
+               results.push(memo.concat(cur));
+            }
+            permute(arr.slice(), memo.concat(cur));
+            arr.splice(i, 0, cur[0]);
+         }
+
+         return results;
+      }
+
+      return permute(inputArr);
+   }
+
+   function add_destination(city, destination, distance) {
+      if (!(city in places)) {
+         places[city] = {};
+      }
+
+      var destinations = places[city];
+
+      destinations[destination] = distance;
+   }
+
+   function get_distance(city, destination) {
+      var distance = 0;
+
+      if (city in places) {
+         var destinations = places[city];
+         if (destination in destinations) {
+            distance = destinations[destination];
+         }
+      }
+
+      return distance;
+   }
+
+   function calculate_distance(route) {
+      var result = 0;
+
+      for (var i = 0; i < route.length - 1; i++) {
+         result += get_distance(route[i], route[i + 1]);
+      }
+
+      return result;
+   }
+
+   function advent_9_data() {
+      var lines = fs.readFileSync('data/9', 'utf8').split('\n');
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i],
+             regex = /(\w+) to (\w+) = (\d+)/.exec(line);
+
+         if (regex) {
+            var distance = parseInt(regex[3]);
+
+            add_destination(regex[1], regex[2], distance);
+            add_destination(regex[2], regex[1], distance);
+         }
+      }
+   }
+
+   function advent_9_1() {
+      var distance = Infinity;
+
+      advent_9_data();
+
+      permutator(Object.keys(places)).forEach((route) => {
+         distance = Math.min(distance, calculate_distance(route));
+      });
+
+      return distance;
+   }
+
+   function advent_9_2() {
+      var distance = -Infinity;
+
+      advent_9_data();
+
+      permutator(Object.keys(places)).forEach((route) => {
+         distance = Math.max(distance, calculate_distance(route));
+      });
+
+      return distance;
+   }
+
+   /***
     * Day 10 *
            ***/
 
@@ -718,27 +817,6 @@
            ***/
 
    var people = {};
-
-   function permutator(inputArr) {
-      var results = [];
-
-      function permute(arr, memo) {
-         var cur, memo = memo || [];
-
-         for (var i = 0; i < arr.length; i++) {
-            cur = arr.splice(i, 1);
-            if (arr.length === 0) {
-               results.push(memo.concat(cur));
-            }
-            permute(arr.slice(), memo.concat(cur));
-            arr.splice(i, 0, cur[0]);
-         }
-
-         return results;
-      }
-
-      return permute(inputArr);
-   }
 
    function add_neighbor(person, neighbor, happiness) {
       if (!(person in people)) {
