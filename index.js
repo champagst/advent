@@ -499,15 +499,14 @@
 
    function encode(s) {
       var new_str = '';
-      new_str += '"';
-      [].forEach.call(s, (c) => {
-         if (c == '"' || c == '\\') {
+      for (var i = 0; i < s.length; i++) {
+         var c = s[i];
+         if (c === '"' || c === '\\') {
             new_str += '\\';
          }
          new_str += c;
-      });
-      new_str += '"';
-      return new_str;
+      }
+      return '"' + new_str + '"';
    }
 
    function advent_8_2() {
@@ -634,16 +633,19 @@
    }
 
    function count_pairs(s) {
-      var count = 0;
-      for (var i = 0; i < s.length;) {
-         var tmp = s.slice(i, i + 2);
+      var count = 0,
+          array = s.split('');
+
+      while (array.length) {
+         var tmp = array.slice(0, 2).join('');
          if (has_pair(tmp)) {
             count++;
-            i += 2;
+            array.splice(0, 2);
          } else {
-            i++;
+            array.splice(0, 1);
          }
       }
+
       return count;
    }
 
@@ -682,39 +684,33 @@
    function sum(object) {
       var acc = 0;
 
-      if (Array.isArray(object)) {
+      if (typeof object === 'number') {
+         acc += object;
+      } else if (Array.isArray(object)) {
          for (var i = 0; i < object.length; i++) {
-            var element = object[i];
-            if (typeof(element) === 'number') {
-               acc += element;
-            } else {
-               acc += sum(element);
-            }
+            acc += sum(object[i]);
          }
-      } else if (typeof(object) === 'object') {
-         for (var property in object) {
-            if (object[property] === 'red') {
-               return acc;
-            }
-         }
+      } else if (typeof object === 'object') {
+         var total = 0;
 
          for (var property in object) {
-            var element = object[property];
-            if (typeof(element) === 'number') {
-               acc += element;
-            } else {
-               acc += sum(element);
+            var value = object[property];
+
+            if (value === 'red') {
+               return acc;
             }
+
+            total += sum(value);
          }
+
+         acc += total;
       }
 
       return acc;
    }
 
    function advent_12_2() {
-      var data = advent_12_data();
-
-      return sum(JSON.parse(data));
+      return sum(JSON.parse(advent_12_data()));
    }
 
    /***
