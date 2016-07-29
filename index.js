@@ -841,45 +841,56 @@
       return happiness;
    }
 
+   function seating_index(person, seating) {
+      return seating.indexOf(person);
+   }
+
+   function total_happiness(person, seating) {
+      var left = left_partner(person, seating),
+          right = right_partner(person, seating);
+      return get_happiness(person, left) + get_happiness(person, right);
+   }
+
+   function left_partner(person, seating) {
+      var idx = seating_index(person, seating),
+          left_idx = idx === 0 ? seating.length - 1 : idx - 1;
+      return seating[left_idx];
+   }
+
+   function right_partner(person, seating) {
+      var idx = seating_index(person, seating),
+          right_idx = idx === seating.length - 1 ? 0 : idx + 1;
+      return seating[right_idx];
+   }
+
    function calculate_happiness(seating) {
       var result = 0;
 
-      seating.forEach((person, i) => {
-         var left, right;
-
-         if (i === 0) {
-            left = seating[seating.length - 1];
-         } else {
-            left = seating[i - 1];
-         }
-
-         if (i === seating.length - 1) {
-            right = seating[0];
-         } else {
-            right = seating[i + 1];
-         }
-
-         result += get_happiness(person, left) + get_happiness(person, right);      
+      seating.forEach((person) => {
+         result += total_happiness(person, seating);
       });
 
       return result;
    }
 
+   function line_to_neighbors(line) {
+      var regex = /(\w+) would (gain|lose) (\d+) happiness units by sitting next to (\w+)./.exec(line);
+
+      if (regex) {
+         var units = parseInt(regex[3]);
+
+         if (regex[2] === 'lose') {
+            units *= -1;
+         }
+
+         add_neighbor(regex[1], regex[4], units);
+      }
+   }
+
    function advent_13_data() {
       var lines = fs.readFileSync('data/13', 'utf8').split('\n');
       for (var i = 0; i < lines.length; i++) {
-         var line = lines[i],
-             regex = /(\w+) would (gain|lose) (\d+) happiness units by sitting next to (\w+)./.exec(line);
-
-         if (regex) {
-            var units = parseInt(regex[3]);
-
-            if (regex[2] === 'lose') {
-               units *= -1;
-            }
-
-            add_neighbor(regex[1], regex[4], units);
-         }
+         line_to_neighbors(lines[i]);
       }
    }
 
@@ -901,8 +912,8 @@
       advent_13_data();
 
       Object.keys(people).forEach((person) => {
-         add_neighbor('Me', person, 0);
-         add_neighbor(person, 'Me', 0);
+         line_to_neighbors('Me would gain 0 happiness units by sitting next to ' + person + '.');
+         line_to_neighbors(person + ' would gain 0 happiness units by sitting next to Me.');
       });
 
       permutator(Object.keys(people)).forEach((seating) => {
@@ -910,5 +921,118 @@
       });
 
       return happiness;
+   }
+
+   /***
+    * Day 14 *
+           ***/
+
+   var time_travelled = 2503;
+
+   function Reindeer(name, speed, stamina, rest) {
+      var self = this;
+
+      self.name = name;
+      self.speed = speed;
+      self.stamina = stamina;
+      self.rest = rest;
+
+      self.distance_travelled = function(time) {
+         function cycle_length() {
+            return self.stamina + self.rest;
+         }
+
+         function cycles_passed() {
+            return Math.floor(time / cycle_length());
+         }
+
+         function travelling_time() {
+            return cycles_passed() * self.stamina;
+         }
+
+         function resting_time() {
+            return cycles_passed() * self.rest;
+         }
+
+         function total_time() {
+            return travelling_time() + resting_time();
+         }
+
+         function seconds_travelling() {
+            var travelling = travelling_time(),
+                remaining = time - total_time();
+
+            if (remaining <= self.stamina) {
+               travelling += remaining;
+            } else {
+               travelling += self.stamina;
+            }
+
+            return travelling;
+         }
+
+         return seconds_travelling() * self.speed;
+      };
+   }
+
+   function line_to_reindeer(line) {
+      var regex = /(\w+) can fly (\d+) km\/s for (\d+) seconds, but then must rest for (\d+) seconds./.exec(line);
+
+      if (regex) {
+         return new Reindeer(regex[1], parseInt(regex[2]), parseInt(regex[3]), parseInt(regex[4]));
+      }
+   }
+
+   function advent_14_data() {
+      var lines = fs.readFileSync('data/14', 'utf8').split('\n'),
+          results = [];
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i];
+
+         if (line.length) {
+            results.push(line_to_reindeer(line));
+         }
+      }
+      return results;
+   }
+
+   function advent_14_1() {
+      var distance = -Infinity;
+
+      advent_14_data().forEach((reindeer) => {
+         distance = Math.max(distance, reindeer.distance_travelled(time_travelled));
+      });
+
+      return distance;
+   }
+
+   function advent_14_2() {
+      var data = advent_14_data();
+
+      for (var i = 1; i <= time_travelled; i++) {
+         var distance = -Infinity;
+
+         data.forEach((reindeer) => {
+            if (!('points' in reindeer)) {
+               reindeer.points = 0;
+            }
+
+            distance = Math.max(distance, reindeer.distance_travelled(i));
+         });
+
+         data.forEach((reindeer) => {
+            if (reindeer.distance_travelled(i) === distance) {
+               reindeer.points++;
+            }
+         });
+      }
+
+      var points = -Infinity;
+
+      data.forEach((reindeer) => {
+         points = Math.max(points, reindeer.points);
+      });
+
+      return points;
    }
 })();
