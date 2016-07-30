@@ -1035,4 +1035,142 @@
 
       return points;
    }
+
+   /***
+    * Day 15 *
+           ***/
+
+   function range(end) {
+      var results = [];
+
+      for (var i = 0; i < end; i++) {
+         results.push(i);
+      }
+
+      return results;
+   }
+
+   function* combinations_with_replacement(iterable, r) {
+      var indices = Array(r).fill(0);
+
+      while (indices[0] < iterable.length) {
+         var tmp = [];
+
+         indices.forEach((index) => {
+            tmp.push(iterable[index]);
+         });
+
+         yield tmp;
+
+         for (var i = r - 1; i >= 0; i--) {
+            if (i === 0 || indices[i] < iterable.length - 1) {
+               indices[i]++;
+               break;
+            } else {
+               indices[i] = 0;
+            }
+         }
+      }
+   }
+
+   function Ingredient(name, properties) {
+      this.name = name;
+      this.properties = properties;
+   }
+
+   function line_to_ingredient(line) {
+      var regex = /(\w+): capacity (-?\d+), durability (-?\d+), flavor (-?\d+), texture (-?\d+), calories (-?\d+)/.exec(line);
+
+      if (regex) {
+         return new Ingredient(regex[1], { 'capacity': parseInt(regex[2]), 'durability': parseInt(regex[3]), 'flavor': parseInt(regex[4]), 'texture': parseInt(regex[5]), 'calories': parseInt(regex[6]) });
+      }
+   }
+
+   function advent_15_data() {
+      var lines = fs.readFileSync('data/15', 'utf8').split('\n'),
+          results = [];
+
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i];
+
+         if (line.length) {
+            results.push(line_to_ingredient(line));
+         }
+      }
+
+      return results;
+   }
+
+   function score(ingredients, tsps) {
+      var capacity = 0,
+          durability = 0,
+          flavor = 0,
+          texture = 0;
+
+      for (var i = 0; i < ingredients.length; i++) {
+         capacity += ingredients[i].properties['capacity'] * tsps[i];
+         durability += ingredients[i].properties['durability'] * tsps[i];
+         flavor += ingredients[i].properties['flavor'] * tsps[i];
+         texture += ingredients[i].properties['texture'] * tsps[i];
+      } 
+
+      if (capacity < 0) {
+         capacity = 0;
+      }
+
+      if (durability < 0) {
+         durability = 0;
+      }
+
+      if (flavor < 0) {
+         flavor = 0;
+      }
+
+      if (texture < 0) {
+         texture = 0;
+      }
+
+      return capacity * durability * flavor * texture;
+   }
+
+   function calories(ingredients, tsps) {
+      var result = 0;
+
+      for (var i = 0; i < ingredients.length; i++) {
+         result += ingredients[i].properties['calories'] * tsps[i];
+      }
+
+      if (result < 0) {
+         result = 0;
+      }
+
+      return result;
+   }
+
+   function advent_15_1() {
+      var ingredients = advent_15_data(),
+          total = -Infinity;
+
+      for (let tsps of combinations_with_replacement(range(101), ingredients.length)) {
+         if (tsps.reduce((a, b) => { return a + b; }) === 100) {
+            total = Math.max(total, score(ingredients, tsps));
+         }
+      }
+
+      return total;
+   }
+
+   function advent_15_2() {
+      var ingredients = advent_15_data(),
+          total = -Infinity;
+
+      for (let tsps of combinations_with_replacement(range(101), ingredients.length)) {
+         if (tsps.reduce((a, b) => { return a + b; }) === 100 &&
+               calories(ingredients, tsps) === 500) {
+            total = Math.max(total, score(ingredients, tsps));
+         }
+      }
+
+      return total;
+   }
 })();
