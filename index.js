@@ -1050,20 +1050,24 @@
       return results;
    }
 
-   function* combinations_with_replacement(iterable, r) {
+   function sum(arr) {
+      return arr.reduce((a, b) => { return a + b; });
+   }
+
+   function* combinations_with_replacement(arr, r) {
       var indices = Array(r).fill(0);
 
-      while (indices[0] < iterable.length) {
+      while (indices[0] < arr.length) {
          var tmp = [];
 
          indices.forEach((index) => {
-            tmp.push(iterable[index]);
+            tmp.push(arr[index]);
          });
 
          yield tmp;
 
-         for (var i = r - 1; i >= 0; i--) {
-            if (i === 0 || indices[i] < iterable.length - 1) {
+         for (var i = indices.length - 1; i >= 0; i--) {
+            if (i === 0 || indices[i] < arr.length - 1) {
                indices[i]++;
                break;
             } else {
@@ -1073,16 +1077,20 @@
       }
    }
 
-   function Ingredient(name, properties) {
+   function Ingredient(name, capacity, durability, flavor, texture, calories) {
       this.name = name;
-      this.properties = properties;
+      this.capacity = capacity;
+      this.durability = durability;
+      this.flavor = flavor;
+      this.texture = texture;
+      this.calories = calories;
    }
 
    function line_to_ingredient(line) {
       var regex = /(\w+): capacity (-?\d+), durability (-?\d+), flavor (-?\d+), texture (-?\d+), calories (-?\d+)/.exec(line);
 
       if (regex) {
-         return new Ingredient(regex[1], { 'capacity': parseInt(regex[2]), 'durability': parseInt(regex[3]), 'flavor': parseInt(regex[4]), 'texture': parseInt(regex[5]), 'calories': parseInt(regex[6]) });
+         return new Ingredient(regex[1], parseInt(regex[2]), parseInt(regex[3]), parseInt(regex[4]), parseInt(regex[5]), parseInt(regex[6]));
       }
    }
 
@@ -1108,10 +1116,10 @@
           texture = 0;
 
       for (var i = 0; i < ingredients.length; i++) {
-         capacity += ingredients[i].properties['capacity'] * tsps[i];
-         durability += ingredients[i].properties['durability'] * tsps[i];
-         flavor += ingredients[i].properties['flavor'] * tsps[i];
-         texture += ingredients[i].properties['texture'] * tsps[i];
+         capacity += ingredients[i].capacity * tsps[i];
+         durability += ingredients[i].durability * tsps[i];
+         flavor += ingredients[i].flavor * tsps[i];
+         texture += ingredients[i].texture * tsps[i];
       } 
 
       if (capacity < 0) {
@@ -1137,11 +1145,7 @@
       var result = 0;
 
       for (var i = 0; i < ingredients.length; i++) {
-         result += ingredients[i].properties['calories'] * tsps[i];
-      }
-
-      if (result < 0) {
-         result = 0;
+         result += ingredients[i].calories * tsps[i];
       }
 
       return result;
@@ -1152,7 +1156,7 @@
           total = -Infinity;
 
       for (let tsps of combinations_with_replacement(range(101), ingredients.length)) {
-         if (tsps.reduce((a, b) => { return a + b; }) === 100) {
+         if (sum(tsps) === 100) {
             total = Math.max(total, score(ingredients, tsps));
          }
       }
@@ -1165,8 +1169,7 @@
           total = -Infinity;
 
       for (let tsps of combinations_with_replacement(range(101), ingredients.length)) {
-         if (tsps.reduce((a, b) => { return a + b; }) === 100 &&
-               calories(ingredients, tsps) === 500) {
+         if (sum(tsps) === 100 && calories(ingredients, tsps) === 500) {
             total = Math.max(total, score(ingredients, tsps));
          }
       }
