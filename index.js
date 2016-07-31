@@ -1176,4 +1176,103 @@
 
       return total;
    }
+
+   /***
+    * Day 16 *
+           ***/
+
+   var ticker_tape_sue = { 'children': 3, 'cats': 7, 'samoyeds': 2, 'pomeranians': 3, 'akitas': 0, 'vizslas': 0, 'goldfish': 5, 'trees': 3, 'cars': 2, 'perfumes': 1 };
+
+   function line_to_sue(line) {
+      var sue = {},
+          regex = /Sue (\d+): (.*)/.exec(line),
+          properties,
+          result;
+
+      if (regex) {
+         sue.number = parseInt(regex[1]);
+         properties = regex[2];
+
+         regex = /(\w+): (\d+)/g;
+         
+         while ((result = regex.exec(properties)) != null) {
+            sue[result[1]] = parseInt(result[2]);
+         }
+
+         return sue;
+      }
+   }
+
+   function max(arr, fn) {
+      var rank = -Infinity,
+          result;
+
+      arr.forEach((item) => {
+         var tmp = fn(item);
+
+         if (tmp > rank) {
+            rank = tmp;
+            result = item;
+         }
+      });
+
+      return result;
+   }
+
+   function advent_16_data() {
+      var lines = fs.readFileSync('data/16', 'utf8').split('\n'),
+          results = [];
+
+      for (var i = 0; i < lines.length; i++) {
+         var line = lines[i];
+
+         if (line.length) {
+            results.push(line_to_sue(line));
+         }
+      }
+
+      return results;
+   }
+
+   function advent_16_1() {
+      function score(sue) {
+         var result = 0;
+
+         for (var property in ticker_tape_sue) {
+            if (property in sue && ticker_tape_sue[property] === sue[property]) {
+               result++;
+            }
+         }
+
+         return result;
+      }
+
+      return max(advent_16_data(), score).number;
+   }
+
+   function advent_16_2() {
+      function score(sue) {
+         var result = 0;
+
+         for (var property in ticker_tape_sue) {
+            if (property in sue) {
+               if (property === 'cats' || property === 'trees') {
+                  if (ticker_tape_sue[property] < sue[property]) {
+                     result++;
+                  }
+               } else if (property === 'pomeranians' || property === 'goldfish') {
+                  if (ticker_tape_sue[property] > sue[property]) {
+                     result++;
+                  }
+               } else if (ticker_tape_sue[property] === sue[property]) {
+                  result++;
+               }
+            }
+         }
+
+         return result;
+      }
+
+      return max(advent_16_data(), score).number;
+   }
 })();
